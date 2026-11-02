@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC販売利益シミュレーター</title>
+<meta name="description" content="販売価格・原価・手数料・送料を入れるだけで、1件の手取り利益・利益率・月の利益・損益分岐点が分かる無料シミュレーター。BASE / Shopify / minne / Creema / 楽天市場 / メルカリShops のチャネル比較と、複数商品のリスト管理・CSV出力に対応。入力した数字は保存されません。">
+<meta property="og:title" content="EC販売利益シミュレーター">
+<meta property="og:description" content="売る前に、手取りが分かる。価格・原価・手数料・送料を入れるだけで1件利益と月の利益を試算。チャネル比較・商品リスト・CSV出力つき。登録不要・無料。">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#0B1220;
+    --bg-2:#0E1628;
+    --panel:#111C33;
+    --panel-2:#16233F;
+    --panel-3:#1B2A4A;
+    --ink:#EDF2F9;
+    --ink-2:#C3CEDD;
+    --muted:#8B99B0;
+    --line:#26355A;
+    --line-soft:#1E2C4C;
+    --teal:#2DD4BF;
+    --cyan:#38BDF8;
+    --accent:#2DD4BF;
+    --red:#FB7185;
+    --red-bg:rgba(251,113,133,.12);
+    --gold:#FBBF24;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 85% -10%,rgba(56,189,248,.14),transparent 60%),radial-gradient(900px 500px at -10% 10%,rgba(45,212,191,.10),transparent 55%),var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP",sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .mono{font-variant-numeric:tabular-nums}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 64px}
+
+  .strip{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+  .strip strong{font-weight:800;letter-spacing:.04em}
+  .strip strong b{color:var(--teal)}
+  .strip span{color:var(--muted);font-weight:600}
+
+  header{padding:38px 0 28px}
+  .kicker{font-size:12px;font-weight:800;letter-spacing:.22em;color:var(--teal);margin:0 0 12px}
+  h1{font-size:clamp(32px,5.4vw,56px);line-height:1.08;letter-spacing:-.02em;margin:0;font-weight:800}
+  h1 em{font-style:normal;color:var(--teal)}
+  .lead{font-size:15.5px;line-height:1.9;color:var(--ink-2);margin:18px 0 0;max-width:760px}
+  .lead b{color:var(--ink)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+  .meta-row span{font-size:12px;font-weight:700;border:1px solid var(--line);padding:6px 11px;border-radius:999px;background:var(--panel);color:var(--ink-2)}
+
+  .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:18px;align-items:start}
+  @media(max-width:920px){ .grid{grid-template-columns:1fr} }
+
+  .panel{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft)}
+  .panel-head h2{font-size:15px;margin:0;letter-spacing:.02em}
+  .panel-head p{margin:2px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
+  .reset-btn{appearance:none;border:1px solid var(--line);background:var(--panel-3);color:var(--ink-2);font:inherit;font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
+  .reset-btn:active{transform:translateY(1px)}
+
+  .form{padding:18px}
+  .group{padding:16px 0;border-top:1px dashed var(--line-soft)}
+  .group:first-child{padding-top:2px;border-top:none}
+  .group-title{display:flex;align-items:baseline;gap:9px;margin-bottom:12px}
+  .group-title .num{font-size:11px;font-weight:800;background:var(--teal);color:#06251F;width:22px;height:22px;display:inline-grid;place-items:center;border-radius:50%;flex:none;transform:translateY(3px)}
+  .group-title h3{font-size:14px;margin:0}
+  .group-title small{color:var(--muted);font-size:11.5px}
+
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .fields.one{grid-template-columns:1fr}
+  @media(max-width:480px){ .fields{grid-template-columns:1fr} }
+  .field label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;color:var(--ink-2)}
+  .field label span{font-weight:500;color:var(--muted)}
+  .input-wrap{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg-2)}
+  .input-wrap:focus-within{outline:2px solid var(--teal);outline-offset:1px}
+  .input-wrap input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-size:17px;font-weight:600;padding:11px 12px;outline:none;text-align:right;font-variant-numeric:tabular-nums}
+  .input-wrap input[type="text"]{text-align:left;font-size:15px}
+  .input-wrap .unit{display:grid;place-items:center;padding:0 12px;background:var(--panel-3);border-left:1px solid var(--line-soft);font-size:12px;font-weight:700;color:var(--muted);min-width:44px}
+  .hint{font-size:11.5px;color:var(--muted);line-height:1.6;margin:7px 0 0}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{appearance:none;border:1px solid var(--line);background:var(--bg-2);color:var(--ink-2);font:inherit;font-size:13px;font-weight:700;padding:9px 13px;border-radius:999px;cursor:pointer;line-height:1}
+  .chip small{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:4px}
+  .chip.active{background:var(--teal);border-color:var(--teal);color:#06251F}
+  .chip.active small{color:#0B4A41}
+  .preset-note{margin-top:10px;font-size:12px;line-height:1.7;color:var(--ink-2);background:var(--bg-2);border:1px solid var(--line-soft);border-radius:8px;padding:10px 12px}
+  .preset-note b{color:var(--teal)}
+
+  .seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{appearance:none;border:0;background:var(--bg-2);color:var(--muted);font:inherit;font-size:13px;font-weight:700;padding:11px 8px;cursor:pointer}
+  .seg button.active{background:var(--teal);color:#06251F}
+  .seg button + button{border-left:1px solid var(--line-soft)}
+
+  .results{background:linear-gradient(180deg,#0A1526,#0D1B31);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:sticky;top:14px}
+  @media(max-width:920px){ .results{position:static} }
+  .results-head{padding:18px 20px 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .results-head h2{font-size:14px;margin:0}
+  .results-head p{margin:3px 0 0;font-size:12px;color:var(--muted);line-height:1.5}
+  .live-badge{font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--teal);padding:6px 9px;border-radius:999px;white-space:nowrap}
+  .hero-num{padding:12px 20px 4px}
+  .hero-num .cap{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.08em}
+  .hero-num .big{font-size:clamp(40px,6vw,54px);font-weight:800;line-height:1.05;letter-spacing:-.01em;color:var(--teal);font-variant-numeric:tabular-nums}
+  .hero-num .big.negative{color:var(--red)}
+  .hero-num .sub{font-size:12.5px;color:var(--ink-2);margin-top:6px;line-height:1.6}
+  .hero-num .sub b{color:var(--ink)}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border-top:1px solid var(--line-soft);margin-top:16px}
+  .stat{background:#0C1830;padding:14px 18px}
+  .stat .cap{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.05em}
+  .stat .val{font-size:22px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+  .stat .val.negative{color:var(--red)}
+  .stat .val.lime{color:var(--teal)}
+  .stat .note{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+  .breakdown{padding:16px 20px 6px}
+  .breakdown h3{font-size:12.5px;margin:0 0 8px;color:var(--muted);letter-spacing:.06em}
+  .row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 0;border-bottom:1px dashed var(--line-soft);font-size:14px}
+  .row:last-child{border-bottom:none}
+  .row .r-label{color:var(--ink-2)}
+  .row .r-label small{display:block;color:var(--muted);font-size:11px;margin-top:1px}
+  .row .r-val{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .row.total{border-top:2px solid var(--teal);margin-top:6px;padding-top:10px}
+  .row.total .r-label{font-weight:800;color:var(--ink)}
+  .row.total .r-val{font-size:17px;color:var(--teal)}
+  .r-val.negative,.negative{color:var(--red)}
+  .verdict{margin:14px 20px 20px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;background:var(--panel-2);font-size:13.5px;line-height:1.75;color:var(--ink-2)}
+  .verdict b{color:var(--ink)}
+  .verdict.warn{border-left-color:var(--red);background:var(--red-bg)}
+
+  section.compare,section.catalog{margin-top:20px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+  .compare-head,.catalog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+  section.compare h2,section.catalog h2{font-size:17px;margin:0}
+  section.compare p,section.catalog p.lead2{color:var(--muted);font-size:13px;line-height:1.7;margin:6px 0 0;max-width:720px}
+  .best{font-size:12.5px;font-weight:800;color:#06251F;background:var(--teal);border-radius:999px;padding:7px 12px;white-space:nowrap}
+  .compare-scroll{overflow-x:auto;margin-top:14px}
+  table.compare-table{width:100%;border-collapse:collapse;min-width:560px;font-size:14px}
+  table.compare-table th,table.compare-table td{padding:10px 12px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+  table.compare-table th{font-size:12px;color:var(--muted);letter-spacing:.04em}
+  table.compare-table th:first-child,table.compare-table td:first-child{text-align:left}
+  table.compare-table td.num{font-weight:700;font-variant-numeric:tabular-nums}
+  table.compare-table tr.is-best td{background:rgba(45,212,191,.08)}
+  table.compare-table tr.is-current td:first-child{box-shadow:inset 3px 0 0 var(--cyan)}
+  .compare-foot{font-size:11.5px;color:var(--muted);line-height:1.7;margin-top:12px}
+
+  .add-area{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .btn-add{appearance:none;border:0;background:var(--teal);color:#06251F;font:inherit;font-size:14px;font-weight:800;padding:12px 20px;border-radius:999px;cursor:pointer}
+  .btn-add:active{transform:translateY(1px)}
+  .btn-sub{appearance:none;border:1px solid var(--line);background:var(--panel-3);color:var(--ink-2);font:inherit;font-size:13px;font-weight:700;padding:11px 16px;border-radius:999px;cursor:pointer}
+  .btn-sub:disabled{opacity:.4;cursor:not-allowed}
+  .editing-banner{display:none;margin-top:14px;padding:10px 14px;border:1px solid var(--gold);border-radius:10px;background:rgba(251,191,36,.10);font-size:13px;color:var(--ink-2)}
+  .editing-banner.show{display:block}
+  .editing-banner b{color:var(--gold)}
+
+  .sum-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:920px){ .sum-grid{grid-template-columns:1fr 1fr} }
+  .sum-card{background:var(--bg-2);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px}
+  .sum-card .cap{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.05em}
+  .sum-card .val{font-size:24px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums}
+  .sum-card .val.negative{color:var(--red)}
+  .sum-card .note{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.55}
+  .coverage{margin-top:14px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;background:var(--bg-2);font-size:13.5px;line-height:1.75;color:var(--ink-2)}
+  .coverage b{color:var(--ink)}
+  .coverage.warn{border-left-color:var(--red);background:var(--red-bg)}
+
+  .list-head,.list-row{display:grid;grid-template-columns:1.6fr .8fr .8fr .9fr .8fr .6fr .6fr .9fr 1.1fr;gap:10px;align-items:center;padding:11px 6px}
+  .list-head{font-size:11.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line);margin-top:16px}
+  .list-row{border-bottom:1px solid var(--line-soft);font-size:14px}
+  .list-row.is-editing{background:rgba(251,191,36,.07)}
+  .p-name{font-weight:700;line-height:1.4}
+  .p-name small{display:block;font-weight:500;color:var(--muted);font-size:11.5px;margin-top:2px}
+  .sample-badge{display:inline-block;margin-left:7px;font-size:10px;font-weight:800;color:#06251F;background:var(--gold);border-radius:999px;padding:2px 7px;vertical-align:2px}
+  .p-num{font-variant-numeric:tabular-nums}
+  .p-num.strong{font-weight:800}
+  .p-channel small{display:block;color:var(--muted);font-size:11px}
+  .p-profit-cell{display:none}
+  .p-meta{display:none}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap}
+  .mini-btn{appearance:none;border:1px solid var(--line);background:var(--panel-3);color:var(--ink-2);font:inherit;font-size:12px;font-weight:700;padding:7px 11px;border-radius:999px;cursor:pointer}
+  .mini-btn.danger{color:var(--red);border-color:rgba(251,113,133,.45)}
+  .empty{margin-top:16px;padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13.5px;line-height:1.7;text-align:center}
+  .list-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  @media(max-width:820px){
+    .list-head{display:none}
+    .list-row{display:block;background:var(--bg-2);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;margin-top:10px}
+    .list-row .p-desktop{display:none}
+    .p-profit-cell{display:block;margin-top:8px}
+    .p-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--muted)}
+    .p-meta b{color:var(--ink-2)}
+    .row-actions{margin-top:10px}
+  }
+
+  .cta{margin-top:20px;background:linear-gradient(120deg,#0A2540,#0B3B4A);border:1px solid var(--line);border-radius:var(--radius);padding:26px;display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:center}
+  @media(max-width:760px){ .cta{grid-template-columns:1fr} }
+  .cta h2{font-size:clamp(22px,3.4vw,30px);margin:0;line-height:1.35}
+  .cta p{color:var(--ink-2);font-size:14px;line-height:1.85;margin:10px 0 0}
+  .cta-actions{display:grid;gap:10px}
+  .cta .btn{display:flex;justify-content:space-between;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:14.5px;padding:15px 18px;border-radius:12px;background:var(--teal);color:#06251F}
+  .cta .btn.secondary{background:transparent;color:var(--ink);border:1px solid var(--line)}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--teal);color:#06251F;font-size:13.5px;font-weight:800;padding:12px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:92vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  footer{margin-top:26px;border-top:1px solid var(--line-soft);padding-top:18px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);line-height:1.8}
+  footer strong{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="strip">
+    <strong>suu <b>|</b> EC・SNS・Web</strong>
+    <span>小さなお店・ブランド専門の無料ツール</span>
+  </div>
+
+  <header>
+    <p class="kicker">FREE TOOL — 利益シミュレーター</p>
+    <h1>EC販売利益<br>シミュレーター</h1>
+    <p class="lead">「売れたのに、手元に残らない」をなくすための計算ツールです。販売価格・原価・手数料・送料を入れるだけで、<b>1件の手取り利益</b>と<b>月の利益</b>、<b>損益分岐点</b>までその場で分かります。出品先ごとの比較と、複数商品のリスト管理・CSV出力にも対応しています。</p>
+    <div class="meta-row">
+      <span>登録不要・無料</span>
+      <span>入力した数字は保存されません</span>
+      <span>スマホ対応</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <section class="panel" aria-labelledby="form-title">
+      <div class="panel-head">
+        <div>
+          <h2 id="form-title">商品の条件を入れる</h2>
+          <p>数字を変えると、右の結果がその場で変わります。</p>
+        </div>
+        <button type="button" class="reset-btn" id="resetBtn">初期値に戻す</button>
+      </div>
+      <form class="form" id="calcForm" autocomplete="off">
+
+        <div class="group">
+          <div class="group-title"><span class="num">1</span><h3>商品</h3><small>リストに追加するときの名前です</small></div>
+          <div class="fields one">
+            <div class="field">
+              <label for="productName">商品名</label>
+              <div class="input-wrap"><input type="text" id="productName" value="ハンドメイドピアス" placeholder="例：ハンドメイドピアス"></div>
+            </div>
+          </div>
+          <div class="fields" style="margin-top:12px">
+            <div class="field">
+              <label for="price">販売価格 <span>（税込）</span></label>
+              <div class="input-wrap"><input type="number" id="price" inputmode="decimal" min="0" step="1" value="5500"><span class="unit">円</span></div>
+            </div>
+            <div class="field">
+              <label for="cost">原価 <span>（材料費・仕入れ等）</span></label>
+              <div class="input-wrap"><input type="number" id="cost" inputmode="decimal" min="0" step="1" value="1800"><span class="unit">円</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title"><span class="num">2</span><h3>出品先（チャネル）</h3><small>料率は参考値です。あとから手入力で書き換えられます</small></div>
+          <div class="chips" id="presetChips" role="group" aria-label="チャネルプリセット"></div>
+          <div class="preset-note" id="presetNote"></div>
+          <div class="fields" style="margin-top:12px">
+            <div class="field">
+              <label for="salesRate">販売手数料率 <span>（参考値・編集可能）</span></label>
+              <div class="input-wrap"><input type="number" id="salesRate" inputmode="decimal" min="0" step="0.01" value="3"><span class="unit">%</span></div>
+            </div>
+            <div class="field">
+              <label for="payRate">決済手数料率 <span>（参考値・編集可能）</span></label>
+              <div class="input-wrap"><input type="number" id="payRate" inputmode="decimal" min="0" step="0.01" value="3.6"><span class="unit">%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-title"><span class="num">3</span><h3>1件あたりの経費</h3></div>
+          <div class="fields">
+            <div class="field">
+              <label for="shipping">送料 <span>（1件あたり）</span></label>
+              <div class="input-wrap"><input type="number" id="shipping" inputmode="decimal" min="0" step="1" value="550"><span class="unit">円</span></div>
+            </div>
+            <div class="field">
+              <label>送料の負担</label>
+              <div class="seg" role="group" aria-label="送料負担">
+                <button type="button" id="shipSeller" class="active">販売者が負担</button>
+                <button type="button" id="shipBuyer">購入者が負担</button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="packaging">梱包資材費</label>
+              <div class="input-wrap"><input type="number" id="packaging" inputmode="decimal" min="0" step="1" value="150"><span class="unit">円</span></div>
+            </div>
+            <div class="field">
+              <label for="adCost">広告費 <span>（1件換算）</span></label>
+              <div class="input-wrap"><input type="number" id="adCost" inputmode="decimal" min="0" step="1" value="400"><span class="unit">円</span></div>
+            </div>
+            <div class="field">
+              <label for="otherCost">その他経費 <span>（1件あたり）</span></label>
+              <div class="input-wrap"><input type="number" id="otherCost" inputmode="decimal" min="0" step="1" value="100"><span class="unit">円</span></div>
+            </div>
+          </div>
+          <p class="hint">購入者が送料を負担する設定では、送料は利益から引きません。</p>
+        </div>
+
+        <div class="group">
+          <div class="group-title"><span class="num">4</span><h3>月の条件</h3></div>
+          <div class="fields">
+            <div class="field">
+              <label for="fixedCost">月間固定費 <span>（出店料・ツール代など）</span></label>
+              <div class="input-wrap"><input type="number" id="fixedCost" inputmode="decimal" min="0" step="1" value="15000"><span class="unit">円</span></div>
+            </div>
+            <div class="field">
+              <label for="units">月販売数</label>
+              <div class="input-wrap"><input type="number" id="units" inputmode="numeric" min="0" step="1" value="80"><span class="unit">件</span></div>
+            </div>
+            <div class="field">
+              <label for="targetProfit">月の目標利益</label>
+              <div class="input-wrap"><input type="number" id="targetProfit" inputmode="decimal" min="0" step="1" value="100000"><span class="unit">円</span></div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </section>
+
+    <!-- RESULTS -->
+    <section class="results" aria-labelledby="result-title">
+      <div class="results-head">
+        <div>
+          <h2 id="result-title">試算結果</h2>
+          <p>入力に合わせて自動で計算します。</p>
+        </div>
+        <span class="live-badge">● リアルタイム計算</span>
+      </div>
+      <div class="hero-num">
+        <div class="cap">1件あたりの手取り利益</div>
+        <div class="big mono" id="perProfit">¥—</div>
+        <div class="sub" id="perProfitSub"></div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="cap">月の利益（固定費を引いた後）</div>
+          <div class="val mono" id="monthlyProfit">¥—</div>
+          <div class="note" id="monthlyNote"></div>
+        </div>
+        <div class="stat">
+          <div class="cap">年間換算の利益</div>
+          <div class="val mono" id="annualProfit">¥—</div>
+          <div class="note">今の条件が12ヶ月続いた場合</div>
+        </div>
+        <div class="stat">
+          <div class="cap">損益分岐点</div>
+          <div class="val mono" id="breakEven">—</div>
+          <div class="note">固定費を回収できる月の件数</div>
+        </div>
+        <div class="stat">
+          <div class="cap">目標に必要な件数</div>
+          <div class="val mono" id="targetUnits">—</div>
+          <div class="note" id="targetNote"></div>
+        </div>
+      </div>
+      <div class="breakdown">
+        <h3>1件の内訳</h3>
+        <div id="breakdownRows"></div>
+      </div>
+      <div class="verdict" id="verdict"></div>
+    </section>
+  </div>
+
+  <!-- COMPARE -->
+  <section class="compare" aria-labelledby="compare-title">
+    <div class="compare-head">
+      <div>
+        <h2 id="compare-title">チャネルを変えると、利益はこう変わる</h2>
+        <p>いま入力している商品・原価・経費はそのままに、手数料率だけを各プリセット（参考値）に置き換えた試算です。出店先選びの目安にしてください。</p>
+      </div>
+      <span class="best" id="bestChannel">—</span>
+    </div>
+    <div class="compare-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr><th>チャネル</th><th>手数料計（参考値）</th><th>1件利益</th><th>月利益（固定費を引いた後）</th><th>選択中との差／件</th></tr>
+        </thead>
+        <tbody id="compareBody"></tbody>
+      </table>
+    </div>
+    <p class="compare-foot">※ 各チャネルの月額費用・出品条件・送料設定は含まれていません。月額費用があるチャネルは、上記の「月間固定費」に足して全体で判断してください。料率は参考値で、最新条件は各サービスの公式案内をご確認ください。</p>
+  </section>
+
+  <!-- CATALOG / LIST -->
+  <section class="catalog" aria-labelledby="catalog-title">
+    <div class="catalog-head">
+      <div>
+        <h2 id="catalog-title">商品リストで、お店全体を見る<span id="catalogCount"></span></h2>
+        <p class="lead2">商品ごとに条件を変えて「リストに追加」すると、お店全体の月の利益が見えます。固定費はお店全体で1回だけ引く計算です。<br>入力した数字と商品リストは、このページの中だけで計算され、<b>保存・送信はされません</b>。ページを閉じると消えるので、必要な分は<b>CSVでダウンロードしてお持ち帰りください</b>。</p>
+      </div>
+    </div>
+
+    <div class="add-area">
+      <button type="button" class="btn-add" id="addBtn">＋ この商品をリストに追加</button>
+      <button type="button" class="btn-sub" id="cancelEditBtn" hidden>編集をやめる</button>
+    </div>
+    <div class="editing-banner" id="editingBanner">「<b id="editingName"></b>」を編集中です。上のフォームで数字を変えて「変更を保存する」を押してください。</div>
+
+    <div class="sum-grid">
+      <div class="sum-card">
+        <div class="cap">お店全体の月利益（固定費を引いた後）</div>
+        <div class="val mono" id="sumMonthly">¥0</div>
+        <div class="note" id="sumMonthlyNote"></div>
+      </div>
+      <div class="sum-card">
+        <div class="cap">年間換算</div>
+        <div class="val mono" id="sumAnnual">¥0</div>
+        <div class="note">今の構成が12ヶ月続いた場合</div>
+      </div>
+      <div class="sum-card">
+        <div class="cap">平均利益率（売上加重）</div>
+        <div class="val mono" id="sumMargin">—</div>
+        <div class="note">商品の月利益合計 ÷ 月売上合計</div>
+      </div>
+      <div class="sum-card">
+        <div class="cap">月の売上合計</div>
+        <div class="val mono" id="sumSales" style="font-size:19px">¥0</div>
+        <div class="note" id="sumCountNote"></div>
+      </div>
+    </div>
+    <div class="coverage" id="beStatus"></div>
+
+    <div class="list-head" aria-hidden="true">
+      <span>商品名</span><span style="text-align:right">販売価格</span><span style="text-align:right">原価</span><span>チャネル</span><span style="text-align:right">1件利益</span><span style="text-align:right">利益率</span><span style="text-align:right">月販売数</span><span style="text-align:right">月利益</span><span>操作</span>
+    </div>
+    <div id="productList"></div>
+    <div class="empty" id="emptyState">まだ商品がありません。上のフォームで条件を入れて「リストに追加」を押すと、ここに並びます。</div>
+
+    <div class="list-actions">
+      <button type="button" class="btn-add" id="csvBtn">CSVをダウンロード</button>
+      <button type="button" class="btn-sub" id="clearBtn">リストを全て消す</button>
+    </div>
+    <p class="hint">CSVはExcelでそのまま開けます（ファイル名: ec-profit-list.csv）。月の締めや価格見直しの記録にどうぞ。</p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" aria-labelledby="cta-title">
+    <div>
+      <h2 id="cta-title">数字が見えたら、次は売り方です</h2>
+      <p>利益が出る価格でも、見つけてもらえなければ売れません。商品ページ、プロフィール、投稿の導線まで含めて見直したい方は、相談フォームからどうぞ。売り込みの電話などはしません。</p>
+    </div>
+    <div class="cta-actions">
+      <a class="btn" href="https://docs.google.com/forms/d/e/1FAIpQLScaWJeVlelwyFDRNkOIAxYj-561qeu4dz8GX-D7ZUpakmtxGg/viewform?usp=publish-editor" target="_blank" rel="noopener">ご相談フォームを開く <span>→</span></a>
+      <a class="btn secondary" href="https://muse.ai/s/suu-lp-xno68mggxct1x0/MyzoAd9-gGMttUmosVHN5ICn_scPBZK9OZiWeOaK6yE" target="_blank" rel="noopener">サービス詳細を見る <span>→</span></a>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <footer>
+    <div>計算結果は概算です。手数料・料率は各サービスの最新条件（公式案内）をご確認ください。<br>入力した数字と商品リストはこのページの中だけで計算され、保存・送信はされません。必要な分はCSVでダウンロードしてお持ち帰りください。</div>
+    <div><strong>suu | EC・SNS・Web</strong></div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var PRESETS = [
+    { id:'base',    name:'BASE',        sub:'スタンダード想定', sales:3.0,  pay:3.6, note:'<b>BASE（参考値）</b>：サービス利用料 3% ＋ 決済手数料 3.6% で試算。決済には1件あたりの固定額がかかる場合があり、その分は「その他経費」への加算が必要です。グロースプランでは料率が変わります。' },
+    { id:'shopify', name:'Shopify',     sub:'Basic想定',        sales:0,    pay:3.4, note:'<b>Shopify（参考値）</b>：販売手数料 0% ＋ Shopify Payments 3.4% で試算。別途、月額プラン料金がかかるため「月間固定費」に加えてください。外部決済を使う場合は料率が変わります。' },
+    { id:'minne',   name:'minne',       sub:'ハンドメイド',     sales:10.56,pay:0,   note:'<b>minne（参考値）</b>：販売手数料 10.56% で試算し、決済分は販売手数料側に含む想定で 0% にしています。振込時の手数料は別途かかります。' },
+    { id:'creema',  name:'Creema',      sub:'ハンドメイド',     sales:10.0, pay:0,   note:'<b>Creema（参考値）</b>：成約手数料 10% で試算し、決済分は 0% にしています。カテゴリや条件で料率が変わる場合があります。' },
+    { id:'rakuten', name:'楽天市場',    sub:'出店プランで変動', sales:8.0,  pay:3.5, note:'<b>楽天市場（参考値）</b>：販売手数料 8% ＋ 決済 3.5% の概算です。実際の料率は出店プラン・カテゴリ・システム利用料で大きく変わるため、必ず自店の条件に書き換えてください。月額出店料は「月間固定費」へ。' },
+    { id:'mercari', name:'メルカリShops', sub:'販売手数料のみ', sales:10.0, pay:0,   note:'<b>メルカリShops（参考値）</b>：販売手数料 10% で試算し、決済分は 0% にしています。売上金の振込手数料は別途かかります。' },
+    { id:'none',    name:'手数料なし',  sub:'自社・対面など',   sales:0,    pay:0,   note:'<b>手数料なし</b>：自社販売・対面販売など、販売／決済手数料がかからない場合の試算です。カード決済を使う場合は決済手数料率を書き換えてください。' }
+  ];
+  var DEFAULTS = { price:5500, cost:1800, salesRate:3, payRate:3.6, shipping:550, packaging:150, adCost:400, otherCost:100, fixedCost:15000, units:80, targetProfit:100000, preset:'base', shipSeller:true };
+
+  var els = {};
+  ['price','cost','salesRate','payRate','shipping','packaging','adCost','otherCost','fixedCost','units','targetProfit'].forEach(function(id){ els[id]=document.getElementById(id); });
+  var chipsWrap = document.getElementById('presetChips');
+  var presetNote = document.getElementById('presetNote');
+  var currentPreset = 'base';
+  var shipSeller = true;
+
+  function yen(n){
+    if (!isFinite(n)) return '¥—';
+    var sign = n < 0 ? '−' : '';
+    return sign + '¥' + Math.abs(Math.round(n)).toLocaleString('ja-JP');
+  }
+  function num(id){ var v = parseFloat(els[id].value); return isFinite(v) ? v : 0; }
+  function pct(n){ return (Math.round(n*10)/10).toLocaleString('ja-JP') + '%'; }
+
+  PRESETS.forEach(function(p){
+    var b = document.createElement('button');
+    b.type='button'; b.className='chip' + (p.id===currentPreset?' active':'');
+    b.dataset.id=p.id;
+    b.innerHTML = p.name + '<small>' + p.sub + ' ・ ' + (Math.round((p.sales+p.pay)*10)/10) + '%</small>';
+    b.addEventListener('click', function(){
+      currentPreset = p.id;
+      els.salesRate.value = p.sales;
+      els.payRate.value = p.pay;
+      syncChips(); calc();
+    });
+    chipsWrap.appendChild(b);
+  });
+  function syncChips(){
+    var btns = chipsWrap.querySelectorAll('.chip');
+    btns.forEach(function(b){ b.classList.toggle('active', b.dataset.id===currentPreset); });
+    var p = PRESETS.filter(function(x){return x.id===currentPreset;})[0];
+    if (p) presetNote.innerHTML = p.note;
+    else presetNote.innerHTML = '<b>カスタム料率</b>：手数料率を手入力しています。ご自身の契約条件に合わせてお使いください。';
+  }
+  ['salesRate','payRate'].forEach(function(id){
+    els[id].addEventListener('input', function(){
+      var p = PRESETS.filter(function(x){return x.id===currentPreset;})[0];
+      if (p && (parseFloat(els.salesRate.value)!==p.sales || parseFloat(els.payRate.value)!==p.pay)) { currentPreset='custom'; syncChips(); }
+    });
+  });
+
+  var btnSeller=document.getElementById('shipSeller'), btnBuyer=document.getElementById('shipBuyer');
+  function setShip(seller){
+    shipSeller=seller;
+    btnSeller.classList.toggle('active', seller);
+    btnBuyer.classList.toggle('active', !seller);
+    calc();
+  }
+  btnSeller.addEventListener('click', function(){ setShip(true); });
+  btnBuyer.addEventListener('click', function(){ setShip(false); });
+
+  function calcFor(salesRate, payRate, v, sellerFlag){
+    var salesFee = v.price * salesRate/100;
+    var payFee = v.price * payRate/100;
+    var ship = (sellerFlag === undefined ? shipSeller : sellerFlag) ? v.shipping : 0;
+    var profit = v.price - v.cost - salesFee - payFee - ship - v.packaging - v.adCost - v.otherCost;
+    return { salesFee:salesFee, payFee:payFee, ship:ship, profit:profit };
+  }
+
+  function formValues(){
+    return { price:num('price'), cost:num('cost'), shipping:num('shipping'), packaging:num('packaging'), adCost:num('adCost'), otherCost:num('otherCost'), fixedCost:num('fixedCost'), units:Math.max(0, Math.floor(num('units'))), targetProfit:num('targetProfit') };
+  }
+
+  function calc(){
+    var v = formValues();
+    var r = calcFor(num('salesRate'), num('payRate'), v);
+
+    var perProfitEl = document.getElementById('perProfit');
+    perProfitEl.textContent = yen(r.profit);
+    perProfitEl.classList.toggle('negative', r.profit < 0);
+    var margin = v.price>0 ? (r.profit/v.price*100) : 0;
+    document.getElementById('perProfitSub').innerHTML = '利益率 <b>' + pct(margin) + '</b> ／ 販売価格 ' + yen(v.price) + ' に対して残る割合です。';
+
+    var monthly = r.profit * v.units - v.fixedCost;
+    var monthlyEl = document.getElementById('monthlyProfit');
+    monthlyEl.textContent = yen(monthly);
+    monthlyEl.classList.toggle('negative', monthly<0);
+    monthlyEl.classList.toggle('lime', monthly>=0);
+    document.getElementById('monthlyNote').textContent = '売上 ' + yen(v.price*v.units) + ' ／ 月' + v.units.toLocaleString('ja-JP') + '件 − 固定費 ' + yen(v.fixedCost);
+    var annualEl = document.getElementById('annualProfit');
+    annualEl.textContent = yen(monthly*12);
+    annualEl.classList.toggle('negative', monthly<0);
+
+    var beEl = document.getElementById('breakEven');
+    var tuEl = document.getElementById('targetUnits');
+    var targetNote = document.getElementById('targetNote');
+    if (r.profit > 0){
+      var be = Math.ceil(v.fixedCost / r.profit);
+      beEl.textContent = be.toLocaleString('ja-JP') + ' 件／月';
+      var tu = Math.ceil((v.fixedCost + v.targetProfit) / r.profit);
+      tuEl.textContent = tu.toLocaleString('ja-JP') + ' 件／月';
+      targetNote.textContent = '目標 ' + yen(v.targetProfit) + ' に届く月間件数。今の入力との差は ' + (tu - v.units >= 0 ? '+' : '') + (tu - v.units).toLocaleString('ja-JP') + ' 件です。';
+    } else {
+      beEl.textContent = '到達できません';
+      tuEl.textContent = '到達できません';
+      targetNote.textContent = '1件の利益が0円以下のため、件数を増やしても目標に届きません。';
+    }
+
+    var rows = [
+      ['販売価格','', v.price, false],
+      ['原価','', -v.cost, false],
+      ['販売手数料','料率 ' + pct(num('salesRate')), -r.salesFee, false],
+      ['決済手数料','料率 ' + pct(num('payRate')), -r.payFee, false],
+      ['送料', shipSeller ? '販売者負担' : '購入者負担のため 0円', -r.ship, false],
+      ['梱包資材費','', -v.packaging, false],
+      ['広告費（1件換算）','', -v.adCost, false],
+      ['その他経費','', -v.otherCost, false],
+      ['1件あたり手取り利益','', r.profit, true]
+    ];
+    document.getElementById('breakdownRows').innerHTML = rows.map(function(row){
+      var val;
+      if (row[3]) val = yen(row[2]);
+      else if (row[2] < 0) val = '−¥' + Math.abs(Math.round(row[2])).toLocaleString('ja-JP');
+      else val = yen(row[2]);
+      return '<div class="row' + (row[3]?' total':'') + '"><span class="r-label">' + row[0] + (row[1]?'<small>'+row[1]+'</small>':'') + '</span><span class="r-val' + (row[3] && row[2]<0 ? ' negative':'') + '">' + val + '</span></div>';
+    }).join('');
+
+    var verdict = document.getElementById('verdict');
+    if (r.profit <= 0){
+      verdict.classList.add('warn');
+      verdict.innerHTML = '<b>この条件では、売れるほど赤字が増えます。</b> まず価格、手数料の小さいチャネル、送料負担の見直しのどれかから調整してください。下のチャネル比較で差を確認できます。';
+    } else if (monthly < 0){
+      verdict.classList.remove('warn');
+      verdict.innerHTML = '1件では <b>' + yen(r.profit) + '</b> 残りますが、今の月 <b>' + v.units.toLocaleString('ja-JP') + '件</b> では固定費を回収しきれていません。損益分岐点は <b>' + Math.ceil(v.fixedCost/r.profit).toLocaleString('ja-JP') + '件／月</b> です。あと ' + Math.max(0, Math.ceil(v.fixedCost/r.profit)-v.units).toLocaleString('ja-JP') + ' 件で黒字に入ります。';
+    } else {
+      verdict.classList.remove('warn');
+      verdict.innerHTML = '今の条件なら月 <b>' + yen(monthly) + '</b> の黒字です。目標 ' + yen(v.targetProfit) + ' には月 <b>' + Math.ceil((v.fixedCost+v.targetProfit)/r.profit).toLocaleString('ja-JP') + '件</b> が必要です。件数を増やす前に、広告費を増やしたときの1件利益も試算しておくと安全です。';
+    }
+
+    renderCompare(v);
+  }
+
+  function renderCompare(v){
+    var results = PRESETS.map(function(p){
+      var r = calcFor(p.sales, p.pay, v);
+      return { p:p, profit:r.profit, monthly:r.profit * v.units - v.fixedCost };
+    });
+    var best = results.slice().sort(function(a,b){return b.profit-a.profit;})[0];
+    document.getElementById('bestChannel').textContent = '1件利益が最大： ' + best.p.name + ' ' + yen(best.profit);
+    var current = calcFor(num('salesRate'), num('payRate'), v).profit;
+    var sorted = results.slice().sort(function(a,b){return b.profit-a.profit;});
+    document.getElementById('compareBody').innerHTML = sorted.map(function(x){
+      var diff = x.profit - current;
+      var diffTxt = (currentPreset===x.p.id || Math.abs(diff)<0.5) ? '選択中と同条件' : ((diff>0?'+':'−') + '¥' + Math.abs(Math.round(diff)).toLocaleString('ja-JP'));
+      return '<tr class="' + (x.p.id===best.p.id?'is-best':'') + (x.p.id===currentPreset?' is-current':'') + '">' +
+        '<td><b>' + x.p.name + '</b></td>' +
+        '<td class="num">' + (Math.round((x.p.sales+x.p.pay)*10)/10) + '%</td>' +
+        '<td class="num' + (x.profit<0?' negative':'') + '">' + yen(x.profit) + '</td>' +
+        '<td class="num' + (x.monthly<0?' negative':'') + '">' + yen(x.monthly) + '</td>' +
+        '<td class="num">' + diffTxt + '</td></tr>';
+    }).join('');
+  }
+
+  /* ---------- product list ---------- */
+  var productNameEl = document.getElementById('productName');
+  var addBtn = document.getElementById('addBtn');
+  var cancelEditBtn = document.getElementById('cancelEditBtn');
+  var editingBanner = document.getElementById('editingBanner');
+  var editingNameEl = document.getElementById('editingName');
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  var products = [];
+  var editingId = null;
+  var nextId = 1;
+
+  function showToast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2600);
+  }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+  }
+  function presetById(id){ return PRESETS.filter(function(x){return x.id===id;})[0] || null; }
+  function calcProduct(p){
+    var salesFee = p.price * p.salesRate/100;
+    var payFee = p.price * p.payRate/100;
+    var ship = p.shipSeller ? p.shipping : 0;
+    var profit = p.price - p.cost - salesFee - payFee - ship - p.packaging - p.adCost - p.otherCost;
+    var margin = p.price > 0 ? profit / p.price * 100 : 0;
+    return { salesFee:salesFee, payFee:payFee, ship:ship, profit:profit, margin:margin, monthly:profit * p.units, monthlySales:p.price * p.units };
+  }
+  function currentFormProduct(){
+    var preset = presetById(currentPreset);
+    return {
+      name: (productNameEl.value || '').trim() || '名称未設定の商品',
+      price: num('price'), cost: num('cost'),
+      salesRate: num('salesRate'), payRate: num('payRate'),
+      presetId: currentPreset,
+      presetName: preset ? preset.name : 'カスタム料率',
+      shipping: num('shipping'), shipSeller: shipSeller,
+      packaging: num('packaging'), adCost: num('adCost'), otherCost: num('otherCost'),
+      units: Math.max(0, Math.floor(num('units')))
+    };
+  }
+  function loadIntoForm(p){
+    productNameEl.value = p.name;
+    els.price.value = p.price; els.cost.value = p.cost;
+    els.salesRate.value = p.salesRate; els.payRate.value = p.payRate;
+    els.shipping.value = p.shipping; els.packaging.value = p.packaging;
+    els.adCost.value = p.adCost; els.otherCost.value = p.otherCost;
+    els.units.value = p.units;
+    currentPreset = presetById(p.presetId) ? p.presetId : 'custom';
+    shipSeller = !!p.shipSeller;
+    btnSeller.classList.toggle('active', shipSeller);
+    btnBuyer.classList.toggle('active', !shipSeller);
+    syncChips(); calc();
+  }
+  function setEditing(p){
+    editingId = p ? p.id : null;
+    if (p){
+      addBtn.textContent = '変更を保存する';
+      cancelEditBtn.hidden = false;
+      editingNameEl.textContent = p.name;
+      editingBanner.classList.add('show');
+    } else {
+      addBtn.textContent = '＋ この商品をリストに追加';
+      cancelEditBtn.hidden = true;
+      editingBanner.classList.remove('show');
+    }
+    renderList();
+  }
+  function renderList(){
+    var listEl = document.getElementById('productList');
+    var emptyEl = document.getElementById('emptyState');
+    var fixedCost = num('fixedCost');
+    document.getElementById('catalogCount').textContent = products.length ? '（' + products.length + '商品）' : '';
+    document.getElementById('csvBtn').disabled = products.length === 0;
+    document.getElementById('clearBtn').disabled = products.length === 0;
+    emptyEl.hidden = products.length !== 0;
+
+    var gross = 0, salesTotal = 0, unitsTotal = 0;
+    products.forEach(function(p){ var r = calcProduct(p); gross += r.monthly; salesTotal += r.monthlySales; unitsTotal += p.units; });
+    var net = gross - fixedCost;
+    var wMargin = salesTotal > 0 ? (gross / salesTotal * 100) : 0;
+
+    var sumMonthlyEl = document.getElementById('sumMonthly');
+    sumMonthlyEl.textContent = yen(net);
+    sumMonthlyEl.classList.toggle('negative', net < 0 && products.length > 0);
+    document.getElementById('sumMonthlyNote').textContent = '商品の月利益合計 ' + yen(gross) + ' − 固定費 ' + yen(fixedCost);
+    var sumAnnualEl = document.getElementById('sumAnnual');
+    sumAnnualEl.textContent = yen(net * 12);
+    sumAnnualEl.classList.toggle('negative', net < 0 && products.length > 0);
+    document.getElementById('sumMargin').textContent = products.length ? pct(wMargin) : '—';
+    document.getElementById('sumSales').innerHTML = yen(salesTotal) + '<br><span style="font-size:13px;color:var(--muted);font-weight:600">利益 ' + yen(gross) + '（固定費前）</span>';
+    document.getElementById('sumCountNote').textContent = products.length + '商品 ／ 合計' + unitsTotal.toLocaleString('ja-JP') + '件／月';
+
+    var beEl2 = document.getElementById('beStatus');
+    if (!products.length){
+      beEl2.classList.remove('warn');
+      beEl2.innerHTML = '商品を追加すると、<b>お店全体で固定費を上回っているか</b>がここに表示されます。';
+    } else if (net >= 0){
+      beEl2.classList.remove('warn');
+      beEl2.innerHTML = 'お店全体では黒字です。商品の月利益合計 <b>' + yen(gross) + '</b> が固定費 <b>' + yen(fixedCost) + '</b> を <b>' + yen(net) + '</b> 上回っています。このままの構成が12ヶ月続くと年間 <b>' + yen(net * 12) + '</b> です。';
+    } else {
+      beEl2.classList.add('warn');
+      var bestP = null, bestR = null;
+      products.forEach(function(p){ var r = calcProduct(p); if (r.profit > 0 && (!bestR || r.profit > bestR.profit)){ bestP = p; bestR = r; } });
+      var extra = '';
+      if (bestP) extra = '一番1件利益が高い「' + esc(bestP.name) + '」（' + yen(bestR.profit) + '／件）なら、あと <b>' + Math.ceil(-net / bestR.profit).toLocaleString('ja-JP') + '件／月</b> で固定費を上回ります。';
+      else extra = '1件利益がプラスの商品がないため、件数を増やしても固定費を回収できません。価格か原価・手数料の見直しが先です。';
+      beEl2.innerHTML = 'お店全体ではまだ固定費を回収できていません。商品の月利益合計 <b>' + yen(gross) + '</b> に対して固定費 <b>' + yen(fixedCost) + '</b> で、<b>' + yen(-net) + ' 不足</b>しています。' + extra;
+    }
+
+    listEl.innerHTML = products.map(function(p){
+      var r = calcProduct(p);
+      var feeTotal = Math.round((p.salesRate + p.payRate) * 10) / 10;
+      return '<div class="list-row' + (p.id === editingId ? ' is-editing' : '') + '">' +
+        '<div class="p-name">' + esc(p.name) + (p.isSample ? '<span class="sample-badge">サンプル</span>' : '') + '<small>' + (p.shipSeller ? '送料は販売者負担' : '送料は購入者負担') + ' ／ 送料 ' + yen(p.shipping) + '</small></div>' +
+        '<div class="p-num p-desktop" style="text-align:right">' + yen(p.price) + '</div>' +
+        '<div class="p-num p-desktop" style="text-align:right">' + yen(p.cost) + '</div>' +
+        '<div class="p-channel p-desktop">' + esc(p.presetName) + '<small>手数料計 ' + feeTotal + '%</small></div>' +
+        '<div class="p-num strong p-desktop' + (r.profit < 0 ? ' negative' : '') + '" style="text-align:right">' + yen(r.profit) + '</div>' +
+        '<div class="p-num p-desktop' + (r.profit < 0 ? ' negative' : '') + '" style="text-align:right">' + pct(r.margin) + '</div>' +
+        '<div class="p-num p-desktop" style="text-align:right">' + p.units.toLocaleString('ja-JP') + '件</div>' +
+        '<div class="p-num strong p-desktop' + (r.monthly < 0 ? ' negative' : '') + '" style="text-align:right">' + yen(r.monthly) + '</div>' +
+        '<div class="p-profit-cell"><div style="font-size:11px;color:var(--muted);font-weight:700">月利益</div><div class="p-num strong' + (r.monthly < 0 ? ' negative' : '') + '" style="font-size:17px">' + yen(r.monthly) + '</div><div style="font-size:12px;color:var(--muted)">1件 ' + yen(r.profit) + ' ／ ' + pct(r.margin) + '</div></div>' +
+        '<div class="p-meta"><span>価格 <b>' + yen(p.price) + '</b></span><span>原価 <b>' + yen(p.cost) + '</b></span><span>' + esc(p.presetName) + ' <b>' + feeTotal + '%</b></span><span>月 <b>' + p.units.toLocaleString('ja-JP') + '件</b></span></div>' +
+        '<div class="row-actions">' +
+          '<button type="button" class="mini-btn" data-action="edit" data-id="' + p.id + '">編集</button>' +
+          '<button type="button" class="mini-btn" data-action="dup" data-id="' + p.id + '">複製</button>' +
+          '<button type="button" class="mini-btn danger" data-action="del" data-id="' + p.id + '">削除</button>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  document.getElementById('productList').addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('button[data-action]') : null;
+    if (!btn) return;
+    var id = parseInt(btn.dataset.id, 10);
+    var idx = -1;
+    products.forEach(function(p, i){ if (p.id === id) idx = i; });
+    if (idx < 0) return;
+    var p = products[idx];
+    if (btn.dataset.action === 'edit'){
+      loadIntoForm(p); setEditing(p);
+      document.querySelector('.panel').scrollIntoView({ behavior:'smooth', block:'start' });
+      showToast('「' + p.name + '」をフォームに読み込みました');
+    } else if (btn.dataset.action === 'dup'){
+      var copy = JSON.parse(JSON.stringify(p));
+      copy.id = nextId++; copy.name = p.name + ' のコピー'; copy.isSample = false;
+      products.splice(idx + 1, 0, copy);
+      renderList(); calc();
+      showToast('「' + p.name + '」を複製しました');
+    } else if (btn.dataset.action === 'del'){
+      products.splice(idx, 1);
+      if (editingId === id) setEditing(null);
+      renderList();
+      showToast('「' + p.name + '」を削除しました');
+    }
+  });
+
+  addBtn.addEventListener('click', function(){
+    var data = currentFormProduct();
+    if (editingId !== null){
+      products.forEach(function(p){ if (p.id === editingId){ Object.keys(data).forEach(function(k){ p[k] = data[k]; }); p.isSample = false; } });
+      var editedName = data.name;
+      setEditing(null); renderList();
+      showToast('「' + editedName + '」の変更を保存しました');
+      document.getElementById('catalog-title').scrollIntoView({ behavior:'smooth', block:'start' });
+    } else {
+      data.id = nextId++; data.isSample = false;
+      products.push(data);
+      renderList();
+      showToast('「' + data.name + '」をリストに追加しました（全' + products.length + '商品）');
+      document.getElementById('catalog-title').scrollIntoView({ behavior:'smooth', block:'start' });
+    }
+  });
+  cancelEditBtn.addEventListener('click', function(){ setEditing(null); showToast('編集を取りやめました'); });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if (!products.length) return;
+    products = []; setEditing(null); renderList();
+    showToast('リストを全て消しました');
+  });
+
+  function csvCell(v){
+    var s = String(v == null ? '' : v);
+    if (/[",\n]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  document.getElementById('csvBtn').addEventListener('click', function(){
+    if (!products.length) return;
+    var header = ['商品名','販売価格','原価','販売手数料率（%)','決済手数料率（%)','送料','送料負担','梱包資材費','広告費','その他経費','1件利益','利益率（%)','月販売数','月利益'];
+    var lines = [header.join(',')];
+    var gross = 0;
+    products.forEach(function(p){
+      var r = calcProduct(p); gross += r.monthly;
+      lines.push([p.name, Math.round(p.price), Math.round(p.cost), p.salesRate, p.payRate, Math.round(p.shipping), p.shipSeller ? '販売者負担' : '購入者負担', Math.round(p.packaging), Math.round(p.adCost), Math.round(p.otherCost), Math.round(r.profit), Math.round(r.margin * 10) / 10, p.units, Math.round(r.monthly)].map(csvCell).join(','));
+    });
+    var fixedCost = num('fixedCost');
+    lines.push(['合計（月利益・固定費前）','','','','','','','','','','','', Math.round(gross)].map(csvCell).join(','));
+    lines.push(['月間固定費','','','','','','','','','','','', Math.round(fixedCost)].map(csvCell).join(','));
+    lines.push(['合計（月利益・固定費を引いた後）','','','','','','','','','','','', Math.round(gross - fixedCost)].map(csvCell).join(','));
+    var blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type:'text/csv;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'ec-profit-list.csv';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showToast('CSVをダウンロードしました（' + products.length + '商品）');
+  });
+
+  // sample products so the list is understandable on first open
+  products.push({ id: nextId++, isSample:true, name:'ハンドメイドピアス', price:5500, cost:1800, salesRate:3, payRate:3.6, presetId:'base', presetName:'BASE', shipping:550, shipSeller:true, packaging:150, adCost:400, otherCost:100, units:80 });
+  products.push({ id: nextId++, isSample:true, name:'レザーキーケース', price:8800, cost:3200, salesRate:10.56, payRate:0, presetId:'minne', presetName:'minne', shipping:600, shipSeller:true, packaging:200, adCost:600, otherCost:150, units:30 });
+
+  Object.keys(els).forEach(function(id){ els[id].addEventListener('input', calc); });
+  els.fixedCost.addEventListener('input', renderList);
+  document.getElementById('calcForm').addEventListener('submit', function(e){ e.preventDefault(); });
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    Object.keys(DEFAULTS).forEach(function(k){
+      if (els[k]) els[k].value = DEFAULTS[k];
+    });
+    productNameEl.value = 'ハンドメイドピアス';
+    setEditing(null);
+    currentPreset = DEFAULTS.preset; shipSeller = DEFAULTS.shipSeller;
+    btnSeller.classList.add('active'); btnBuyer.classList.remove('active');
+    syncChips(); calc(); renderList();
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  syncChips();
+  calc();
+  renderList();
+})();
+</script>
+</body>
+</html>
